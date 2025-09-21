@@ -54,7 +54,8 @@ Mesh::Mesh(std::string filename) {
         std::getline(file, line);
         std::istringstream line_stream(line);
         std::string word;
-        line_stream >> word; // Eat the first number (number of vertices in face)
+        line_stream >> word; // Absorb the first number (number of vertices in face)
+        int num_vertices = std::stoi(word);
         float indices[3];
         for(int j = 0; j < 3; ++j) {
             line_stream >> word;
@@ -80,7 +81,7 @@ void Mesh::compute_normals() {
 
         Vec3<float> e1 = v2 - v1;
         Vec3<float> e2 = v3 - v1;
-        Vec3<float> e3 = cross(e2, e1);
+        Vec3<float> e3 = cross(e1, e2);
         Vec3<float> normal = e3 / norm(e3);
         normals[i] = normal;
     }

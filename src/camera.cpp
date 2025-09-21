@@ -27,7 +27,7 @@ Vec3<float> Camera::project(Vec3<float>& v) const {
     Vec3<float> v_cam = dehomogenize(M*v_hom);
     Vec3<float> v_img_hom = K*v_cam;
     Vec2<float> v_img = dehomogenize(v_img_hom);
-    Vec3<float> v_px = Vec3<float>((float)H-v_img.y, v_img.x, v_img_hom.z); // Includes depth
+    Vec3<float> v_px = Vec3<float>(v_img.x, (float)H-v_img.y, v_img_hom.z); // Includes depth
     
     return v_px;
 }

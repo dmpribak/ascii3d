@@ -171,6 +171,17 @@ class SqMat {
             }
         }
 
+        static SqMat Zero() {
+            SqMat M;
+            for(int i = 0; i < N; ++i) {
+                for(int j = 0; j < N; ++j) {
+                    M.m[i][j] = 0;
+                }
+            }
+            
+            return M;
+        }
+
         SqMat(const U mat[N][N]) {
             for(int i = 0; i < N; ++i) {
                 for(int j = 0; j < N; ++j) {
@@ -197,7 +208,7 @@ class SqMat {
         U m[N][N];
 };
 
-template<typename T, int N>
+template <typename T, int N>
 std::ostream& operator<<(std::ostream& os, SqMat<T, N> mat) {
     os << "[\n";
     for(int i = 0; i < N; ++i) {
@@ -211,10 +222,10 @@ std::ostream& operator<<(std::ostream& os, SqMat<T, N> mat) {
     return os;
 }
 
-template<typename T>
+template <typename T>
 using Mat3x3 = SqMat<T, 3>;
 
-template<typename T>
+template <typename T>
 using Mat4x4 = SqMat<T, 4>;
 
 template <typename T>
@@ -224,6 +235,20 @@ Vec3<T> operator*(Mat3x3<T> M, Vec3<T> v) {
             M[1][0]*v.x + M[1][1]*v.y + M[1][2]*v.z,
             M[2][0]*v.x + M[2][1]*v.y + M[2][2]*v.z
             );
+}
+
+template <typename T, int N>
+SqMat<T, N> operator*(SqMat<T, N> A, SqMat<T, N> B) {
+    SqMat<T, N> C = SqMat<T, N>::Zero();
+    for(int i = 0; i < N; ++i) {
+        for(int j = 0; j < N; ++j) {
+            for(int k = 0; k < N; ++k) {
+                C[i][j] += A[i][k] * B[j][k];
+            }
+        }
+    }
+
+    return C;
 }
 
 template <typename T>
