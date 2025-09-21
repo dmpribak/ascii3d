@@ -7,6 +7,7 @@ add_library(lib3d
     src/linalg.cpp
     src/camera.cpp
     src/raster.cpp
+    include/render.h
 )
 target_include_directories(lib3d PUBLIC ${PROJECT_SOURCE_DIR}/include)
 add_executable(ascii3d 

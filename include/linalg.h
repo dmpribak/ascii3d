@@ -107,6 +107,11 @@ Vec3<T> operator*(const Vec3<T>& v, const T a) {
 }
 
 template <typename T>
+Vec3<T> operator*(const T a, const Vec3<T>& v) {
+    return Vec3<T>(v.x*a, v.y*a, v.z*a);
+}
+
+template <typename T>
 std::ostream& operator<<(std::ostream& os, const Vec3<T>& v) {
     return os << "[" << v.x << ", " << v.y << ", " << v.z << "]";
 }

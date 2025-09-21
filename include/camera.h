@@ -1,3 +1,5 @@
+#pragma once
+
 #include "linalg.h"
 
 class Camera {

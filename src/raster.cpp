@@ -18,15 +18,6 @@ bool TriangleRasterizer::inside(Vec2<float> p) {
            e3(p) >= 0;
 }
 
-float TriangleRasterizer::interp(Vec3<float> a, Vec2<float> p) {
-    Vec2<float> uv = Vec2<float>(e2(p), e3(p)) / 
-                     (e1(p) + e2(p) + e3(p));
-    float u = uv.x;
-    float v = uv.y;
-
-    return (1-u-v)*a.x + u*a.y + v*a.z;
-}
-
 float TriangleRasterizer::e1(Vec2<float> p) {
     return dot(n1, p) + c1;
 }
