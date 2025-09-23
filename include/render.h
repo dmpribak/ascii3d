@@ -46,11 +46,20 @@ class Image {
                 float d2 = p2d.z;
                 float d3 = p3d.z;
                 float d_min = std::min(std::min(d1,d2), d3);
+                
+                // Bounding box
+                float x_min = std::min(std::min(p1.x, p2.x), p3.x);
+                x_min = std::max((float)0, x_min);
+                float x_max = std::max(std::max(p1.x, p2.x), p3.x);
+                x_max = std::min((float)W, x_max);
+                float y_min = std::min(std::min(p1.y, p2.y), p3.y);
+                y_min = std::max((float)0, y_min);
+                float y_max = std::max(std::max(p1.y, p2.y), p3.y);
+                y_max = std::min((float)H, y_max);
+                TriangleRasterizer rasterizer(p1d, p2d, p3d);
 
-                TriangleRasterizer rasterizer(p1, p2, p3);
-
-                for(int x = 0; x < W; ++x) {
-                    for(int y = 0; y < H; ++y) {
+                for(int x = (int)x_min; x <= (int)x_max; ++x) {
+                    for(int y = (y_min); y <= (int)y_max; ++y) {
                         // Depth culling
                         if(d_min > depth_buffer[y][x]) continue;
                         Vec2<float> p(x, y);
@@ -64,8 +73,8 @@ class Image {
                             // Shading
                             if(light_source == LightSource::PUNCTUAL) {
                                 Vec3<float> P = rasterizer.interp(P1, P2, P3, p);
-                                light_dir = P - light;
-                                light_dir = light_dir/norm(light_dir);
+                                Vec3<float> light_dir_long = P - light;
+                                light_dir = light_dir_long/norm(light_dir_long);
                             }
                             float shading = std::max((float)0, dot(mesh.normals[i], -light_dir));
                             img[y][x] = shading;

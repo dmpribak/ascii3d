@@ -1,7 +1,7 @@
 #include "raster.h"
 #include "linalg.h"
 
-TriangleRasterizer::TriangleRasterizer(Vec2<float> p1, Vec2<float> p2, Vec2<float> p3) {
+TriangleRasterizer::TriangleRasterizer(Vec3<float> p1, Vec3<float> p2, Vec3<float> p3) {
     n1 = Vec2<float>(-(p2.y-p1.y), p2.x-p1.x);
     c1 = (p2.y - p1.y) * p1.x + -(p2.x - p1.x) * p1.y;
 
@@ -10,6 +10,10 @@ TriangleRasterizer::TriangleRasterizer(Vec2<float> p1, Vec2<float> p2, Vec2<floa
 
     n3 = Vec2<float>(-(p1.y-p3.y), p1.x-p3.x);
     c3 = (p1.y - p3.y) * p3.x + -(p1.x - p3.x) * p3.y;
+
+    d1 = p1.z;
+    d2 = p2.z;
+    d3 = p3.z;
 }
 
 bool TriangleRasterizer::inside(Vec2<float> p) {
@@ -19,13 +23,13 @@ bool TriangleRasterizer::inside(Vec2<float> p) {
 }
 
 float TriangleRasterizer::e1(Vec2<float> p) {
-    return dot(n1, p) + c1;
+    return -dot(n1, p) + -c1;
 }
 
 float TriangleRasterizer::e2(Vec2<float> p) {
-    return dot(n2, p) + c2;
+    return -dot(n2, p) + -c2;
 }
 
 float TriangleRasterizer::e3(Vec2<float> p) {
-    return dot(n3, p) + c3;
+    return -dot(n3, p) + -c3;
 }

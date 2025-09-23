@@ -2,9 +2,10 @@
 #include "linalg.h"
 
 Camera::Camera(int H_, int W_, float f, const Vec3<float> C_, Mat3x3<float> R_): H(H_), W(W_) {
+    float s = (float)H_/(float)W_;
     float mK[3][3] = {
             {f,     0.,     (float)W_/2},
-            {0.,    f,      (float)H_/2},
+            {0.,    f*s,      (float)H_/2},
             {0.,    0.,     1.        }
             };
     K = Mat3x3<float>(mK);
@@ -27,7 +28,7 @@ Vec3<float> Camera::project(Vec3<float>& v) const {
     Vec3<float> v_cam = dehomogenize(M*v_hom);
     Vec3<float> v_img_hom = K*v_cam;
     Vec2<float> v_img = dehomogenize(v_img_hom);
-    Vec3<float> v_px = Vec3<float>(v_img.x, (float)H-v_img.y, v_img_hom.z); // Includes depth
+    Vec3<float> v_px = Vec3<float>(v_img.x, v_img.y, v_img_hom.z); // Includes depth
     
     return v_px;
 }

@@ -1,5 +1,7 @@
 #include <cmath>
 #include <fstream>
+#include <ostream>
+#include <unistd.h>
 
 #include "mesh.h"
 #include "camera.h"
@@ -8,32 +10,42 @@
 
 int main() {
     // Full rendering test
-    std::string palette = " .,~+*:;!?&#%@";
-    int n_palette = 13;
+    // std::string palette = " .,~+*:;!?&#%@";
+    std::string palette[] = {u8" ", u8"'", u8"`", u8".", u8",", u8";", u8":", u8"~", u8"-", u8"=", u8"+", u8"*", u8"a", u8"o", u8"O", u8"0", u8"@"};
+    // palette = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+    int n_palette = 15;
 
     Mesh mesh("/home/dillan/ascii3d/data/cube.ply");
-    // Vec3<float> C(1.0, 0.5, -10);
-    Vec3<float> C(0, 0, -10);
-    Mat3x3<float> R = rot_x(30) * rot_y(60);
-    // Mat3x3<float> R;
-    C = R.T()*C;
-    Vec3<float> light(5, 15, -20);
-    light = C;
     constexpr int H = 128;
     constexpr int W = 128;
-    Camera cam(H, W, 150.0, C, R);
 
-    Image<W, H> image;
+    for(float theta = 0; theta < 1; theta += 0.1) {
+        Vec3<float> C(0, 0, -10);
+        Mat3x3<float> R = rot_y(theta*0.3456) * rot_x(theta) * rot_y(30) * rot_x(70);
+        C = R.T()*C;
+        Vec3<float> light = C*(float)1;
+        Camera cam(H, W, 200.0, C, R);
 
-    image.render(mesh, cam, light, LightSource::PUNCTUAL);
+        Image<W, H> image;
 
-    std::ofstream file("render.txt");
-    for(int row = 0; row < H; ++row) {
-        for(int col = 0; col < W; ++col) {
-            int idx = (int)(image.img[row][col] * (n_palette-1));
-            file << palette[idx] << palette[idx];
+        image.render(mesh, cam, light, LightSource::PUNCTUAL);
+
+        std::ofstream file("render.txt", std::ios::binary);
+        for(int row = 0; row < H; ++row) {
+            for(int col = 0; col < W; ++col) {
+                float idx_float = image.img[H-row-1][col];
+                int idx = 0;
+                if(idx_float > 0) {
+                    idx = (int)(idx_float * (float)(n_palette-2) + (float)1);
+                }
+                file << palette[idx] << palette[idx];
+            }
+            file << "\n";
         }
-        file << "\n";
+        file << std::flush;
+        file.close();
+        usleep(15000);
+        
     }
 
     return 0;
