@@ -9,8 +9,12 @@ add_library(lib3d
     src/raster.cpp
     include/render.h
 )
+
 target_include_directories(lib3d PUBLIC ${PROJECT_SOURCE_DIR}/include)
 add_executable(ascii3d 
     src/main.cpp
 )
 target_link_libraries(ascii3d PRIVATE lib3d)
+
+find_package(ImageMagick COMPONENTS Magick++)
+target_link_libraries(ascii3d PRIVATE ImageMagick::Magick++)

@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "raster.h"
 #include "linalg.h"
+#include <cstddef>
 
 constexpr int MAX_DEPTH = 500;
 
@@ -10,13 +11,25 @@ enum LightSource {
     PUNCTUAL
 };
 
-template <int W, int H>
-class Image {
+template <typename T, int W, int H>
+class BufMat {
     public:
-        float img[H][W];
-        float depth_buffer[H][W];
-        
-        Image() {
+        T *data;
+
+        BufMat() { data = new T[H*W]; }
+
+        ~BufMat() { delete[] data; }
+
+        T *operator[](std::size_t i) { return data + i * W; }
+};
+
+template <int W, int H>
+class FrameBuffer {
+    public:
+        BufMat<float, W, H> img;
+        BufMat<float, W, H> depth_buffer;
+
+        FrameBuffer() {
             for(int row = 0; row < H; ++row) {
                 for(int col = 0; col < W; ++col) {
                     img[row][col] = 0;
@@ -46,7 +59,7 @@ class Image {
                 float d2 = p2d.z;
                 float d3 = p3d.z;
                 float d_min = std::min(std::min(d1,d2), d3);
-                
+
                 // Bounding box
                 float x_min = std::min(std::min(p1.x, p2.x), p3.x);
                 x_min = std::max((float)0, x_min);
