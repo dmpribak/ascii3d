@@ -39,6 +39,11 @@ class FrameBuffer {
         }
 
         void render(Mesh& mesh, Camera& camera, Vec3<float>& light, LightSource light_source) {
+            for(size_t i = 0; i <= W*H; ++i) {
+                img.data[i] = 0;
+                depth_buffer.data[i] = MAX_DEPTH;
+            }
+
             // Initialize for LightSource::DIRECTIONAL
             Vec3<float> light_dir = -light / norm(light);
 
