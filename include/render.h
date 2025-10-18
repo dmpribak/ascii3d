@@ -30,20 +30,16 @@ class FrameBuffer {
         BufMat<float, W, H> depth_buffer;
 
         FrameBuffer() {
-            for(size_t row = 0; row < H; ++row) {
-                for(size_t col = 0; col < W; ++col) {
-                    img[row][col] = 0;
-                    depth_buffer[row][col] = MAX_DEPTH;
-                }
-            }
+            clear();
+        }
+
+        void clear() {
+            std::fill(img.data, img.data + H*W, 0.f);
+            std::fill(depth_buffer.data, depth_buffer.data + H*W, MAX_DEPTH);
         }
 
         void render(Mesh& mesh, Camera& camera, Vec3<float>& light, LightSource light_source) {
-            for(size_t i = 0; i <= W*H; ++i) {
-                img.data[i] = 0;
-                depth_buffer.data[i] = MAX_DEPTH;
-            }
-
+            clear();
             // Initialize for LightSource::DIRECTIONAL
             Vec3<float> light_dir = -light / norm(light);
 
