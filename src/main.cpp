@@ -22,8 +22,8 @@ int main() {
     int n_palette = 15;
 
     Mesh mesh("/home/dillan/ascii3d/data/cube.ply");
-    const int H = 2048;
-    const int W = 2048;
+    const size_t H = 2048;
+    const size_t W = 2048;
 
     for(float theta = 0; theta < 1; theta += 0.1) {
         Vec3<float> C(0, 0, -10);
@@ -38,12 +38,12 @@ int main() {
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
         std::ofstream file("render.txt", std::ios::binary);
-        for(int row = 0; row < H; ++row) {
-            for(int col = 0; col < W; ++col) {
+        for(size_t row = 0; row < H; ++row) {
+            for(size_t col = 0; col < W; ++col) {
                 float idx_float = image.img[H-row-1][col];
-                int idx = 0;
+                size_t idx = 0;
                 if(idx_float > 0) {
-                    idx = (int)(idx_float * (float)(n_palette-2) + (float)1);
+                    idx = (size_t)(idx_float * (float)(n_palette-2) + (float)1);
                 }
                 file << palette[idx] << palette[idx];
             }
@@ -55,8 +55,8 @@ int main() {
 
         Magick::Image my_image(Magick::Geometry(W, H), "white");
 
-        for(int y = 0; y < H; ++y) {
-            for(int x = 0; x < W; ++x) {
+        for(size_t y = 0; y < H; ++y) {
+            for(size_t x = 0; x < W; ++x) {
                 float intensity = image.img[y][x];
                 // float intensity = ((float)x+(float)y)/2.0/W;
                 my_image.pixelColor(x,y,Magick::Color(intensity*65536.0, intensity*65536.0, intensity*65536.0, 65536.0));

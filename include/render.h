@@ -4,14 +4,14 @@
 #include "linalg.h"
 #include <cstddef>
 
-constexpr int MAX_DEPTH = 500;
+constexpr float MAX_DEPTH = 500;
 
 enum LightSource { 
     DIRECTIONAL,
     PUNCTUAL
 };
 
-template <typename T, int W, int H>
+template <typename T, size_t W, size_t H>
 class BufMat {
     public:
         T *data;
@@ -20,18 +20,18 @@ class BufMat {
 
         ~BufMat() { delete[] data; }
 
-        T *operator[](std::size_t i) { return data + i * W; }
+        T *operator[](size_t i) { return data + i * W; }
 };
 
-template <int W, int H>
+template <size_t W, size_t H>
 class FrameBuffer {
     public:
         BufMat<float, W, H> img;
         BufMat<float, W, H> depth_buffer;
 
         FrameBuffer() {
-            for(int row = 0; row < H; ++row) {
-                for(int col = 0; col < W; ++col) {
+            for(size_t row = 0; row < H; ++row) {
+                for(size_t col = 0; col < W; ++col) {
                     img[row][col] = 0;
                     depth_buffer[row][col] = MAX_DEPTH;
                 }
@@ -42,7 +42,7 @@ class FrameBuffer {
             // Initialize for LightSource::DIRECTIONAL
             Vec3<float> light_dir = -light / norm(light);
 
-            for(int i = 0; i < mesh.n_triangles; ++i) {
+            for(size_t i = 0; i < mesh.n_triangles; ++i) {
                 Vec3<float> P1 = mesh.vertices[mesh.triangles[i].x];
                 Vec3<float> P2 = mesh.vertices[mesh.triangles[i].y];
                 Vec3<float> P3 = mesh.vertices[mesh.triangles[i].z];
@@ -71,8 +71,8 @@ class FrameBuffer {
                 y_max = std::min((float)H, y_max);
                 TriangleRasterizer rasterizer(p1d, p2d, p3d);
 
-                for(int x = (int)x_min; x <= (int)x_max; ++x) {
-                    for(int y = (y_min); y <= (int)y_max; ++y) {
+                for(size_t x = x_min; x <= x_max; ++x) {
+                    for(size_t y = y_min; y <= y_max; ++y) {
                         // Depth culling
                         if(d_min > depth_buffer[y][x]) continue;
                         Vec2<float> p(x, y);

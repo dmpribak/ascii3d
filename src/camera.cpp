@@ -1,7 +1,8 @@
 #include "camera.h"
 #include "linalg.h"
+#include <cstddef>
 
-Camera::Camera(int H_, int W_, float f, const Vec3<float> C_, Mat3x3<float> R_): H(H_), W(W_) {
+Camera::Camera(size_t H_, size_t W_, float f, const Vec3<float> C_, Mat3x3<float> R_): H(H_), W(W_) {
     float s = (float)H_/(float)W_;
     float mK[3][3] = {
             {f,     0.,     (float)W_/2},
@@ -12,8 +13,8 @@ Camera::Camera(int H_, int W_, float f, const Vec3<float> C_, Mat3x3<float> R_):
     C = Vec3<float>(C_.x, C_.y, C_.z);
 
     M = Mat4x4<float>();
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
+    for(size_t i = 0; i < 3; ++i) {
+        for(size_t j = 0; j < 3; ++j) {
             M[i][j] = R_[i][j];
         }
     }

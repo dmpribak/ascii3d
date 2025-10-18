@@ -6,9 +6,9 @@
 class Mesh {
     public:
         Vec3<float> *vertices;
-        int n_vertices;
-        Vec3<int> *triangles;
-        int n_triangles;
+        size_t n_vertices;
+        Vec3<size_t> *triangles;
+        size_t n_triangles;
         Vec3<float> *normals;
         
         Mesh(std::string filename);

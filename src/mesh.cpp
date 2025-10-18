@@ -33,16 +33,16 @@ Mesh::Mesh(std::string filename) {
 
     // Reserve memory for data
     vertices = new Vec3<float>[n_vertices];
-    triangles = new Vec3<int>[n_triangles];
+    triangles = new Vec3<size_t>[n_triangles];
     normals = new Vec3<float>[n_triangles];
 
     // Read vertex coordinates
-    for(int i = 0; i < n_vertices; ++i) {
+    for(size_t i = 0; i < n_vertices; ++i) {
         std::getline(file, line);
         std::istringstream line_stream(line);
         std::string word;
         float coords[3];
-        for(int j = 0; j < 3; ++j) {
+        for(size_t j = 0; j < 3; ++j) {
             line_stream >> word;
             coords[j] = std::stof(word);
         }
@@ -50,18 +50,18 @@ Mesh::Mesh(std::string filename) {
     }
 
     // Read triangle indices
-    for(int i = 0; i < n_triangles; ++i) {
+    for(size_t i = 0; i < n_triangles; ++i) {
         std::getline(file, line);
         std::istringstream line_stream(line);
         std::string word;
         line_stream >> word; // Absorb the first number (number of vertices in face)
-        int num_vertices = std::stoi(word);
+        size_t num_vertices = std::stoi(word);
         float indices[3];
-        for(int j = 0; j < 3; ++j) {
+        for(size_t j = 0; j < 3; ++j) {
             line_stream >> word;
             indices[j] = std::stof(word);
         }
-        triangles[i] = Vec3<int>(indices[0], indices[1], indices[2]);
+        triangles[i] = Vec3<size_t>(indices[0], indices[1], indices[2]);
     }
 
     // Compute face normals
@@ -74,7 +74,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::compute_normals() {
-    for(int i = 0; i < n_triangles; ++i) {
+    for(size_t i = 0; i < n_triangles; ++i) {
         Vec3<float> v1 = vertices[triangles[i].x];
         Vec3<float> v2 = vertices[triangles[i].y];
         Vec3<float> v3 = vertices[triangles[i].z];
