@@ -65,11 +65,11 @@ class FrameBuffer {
                 float x_min = std::min(std::min(p1.x, p2.x), p3.x);
                 x_min = std::max((float)0, x_min);
                 float x_max = std::max(std::max(p1.x, p2.x), p3.x);
-                x_max = std::min((float)W, x_max);
+                x_max = std::min((float)(W-1), x_max);
                 float y_min = std::min(std::min(p1.y, p2.y), p3.y);
                 y_min = std::max((float)0, y_min);
                 float y_max = std::max(std::max(p1.y, p2.y), p3.y);
-                y_max = std::min((float)H, y_max);
+                y_max = std::min((float)(H-1), y_max);
                 TriangleRasterizer rasterizer(p1d, p2d, p3d);
 
                 for(size_t x = x_min; x <= x_max; ++x) {

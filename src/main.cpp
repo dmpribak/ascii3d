@@ -46,7 +46,6 @@ int main(int argc, char *argv[]) {
 
         Camera cam(H, W, 1000.0, C, R);
 
-
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
         // Magick::Image my_image(W, H, "I", Magick::FloatPixel, image.img.data);
