@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
         C = R.T()*C;
         Vec3<float> light = C*1.f;
 
-        Camera cam(H, W, 1000.0, C, R);
+        Camera cam(H, W, 1000.f, C, R);
 
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 

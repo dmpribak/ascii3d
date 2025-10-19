@@ -23,3 +23,5 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSIXEL REQUIRED libsixel)
 target_include_directories(ascii3d PRIVATE ${LIBSIXEL_INCLUDE_DIRS})
 target_link_libraries(ascii3d PRIVATE ${LIBSIXEL_LIBRARIES})
+
+add_compile_options(-O3)

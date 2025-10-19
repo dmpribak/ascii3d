@@ -14,6 +14,10 @@ TriangleRasterizer::TriangleRasterizer(Vec3<float> p1, Vec3<float> p2, Vec3<floa
     d1 = p1.z;
     d2 = p2.z;
     d3 = p3.z;
+
+    delta1 = p2-p1;
+    delta2 = p3-p2;
+    delta3 = p1-p3;
 }
 
 bool TriangleRasterizer::inside(Vec2<float> p) {
@@ -32,4 +36,59 @@ float TriangleRasterizer::e2(Vec2<float> p) {
 
 float TriangleRasterizer::e3(Vec2<float> p) {
     return dot(n3, p) + c3;
+}
+
+RasterIterator TriangleRasterizer::xiter(Vec2<float> p) {
+    return RasterIterator(
+            e1(p), e2(p), e3(p),
+            delta1.y, delta2.y, delta3.y
+            );
+}
+
+RasterIterator::value_type RasterIterator::operator*() const {
+    return inside;
+}
+
+RasterIterator& RasterIterator::operator++() {
+    e1 += d1;
+    e2 += d2;
+    e3 += d3;
+    inside = eval();
+
+    return *this;
+}
+
+RasterIterator RasterIterator::operator++(int) {
+    RasterIterator val = *this;
+    ++(*this);
+
+    return val;
+}
+
+RasterIterator& RasterIterator::operator--() {
+    e1 -= d1;
+    e2 -= d2;
+    e3 -= d3;
+    inside = eval();
+
+    return *this;
+}
+
+RasterIterator RasterIterator::operator--(int) {
+    RasterIterator val = *this;
+    --(*this);
+
+    return val;
+}
+
+bool RasterIterator::eval() {
+    return e1 >= 0 &&
+           e2 >= 0 &&
+           e3 >= 0;
+}
+
+RasterIterator::RasterIterator(float e1, float e2, float e3, float d1, float d2, float d3)
+    : e1(e1), e2(e2), e3(e3), d1(d1), d2(d2), d3(d3)
+{
+    inside = eval();
 }
