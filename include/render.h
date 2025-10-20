@@ -94,7 +94,7 @@ void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vec3<float>& light, L
             RasterIterator ri = rasterizer.xiter(Vec2<float>(x_mid, y));
             for(size_t x = x_mid; x <= x_max && x >= x_min; ++x) {
                 // Depth culling and inside check
-                if(!*ri++ || d_min > depth_buffer[y][x]) continue;
+                if(!*ri++ || d_min > depth_buffer[H-y-1][x]) continue;
 
                 bool rendered = render_pixel(x, y, P1, P2, P3, d1, d2, d3, d_min, mesh.normals[i], light, light_source, rasterizer);
                 if(!rendered && inside_found) break;
@@ -104,7 +104,7 @@ void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vec3<float>& light, L
             ri = rasterizer.xiter(Vec2<float>(x_mid, y));
             for(size_t x = x_mid; x >= x_min && x <= x_max; --x) {
                 // Depth culling and inside check
-                if(!*ri-- || d_min > depth_buffer[y][x]) continue;
+                if(!*ri-- || d_min > depth_buffer[H-y-1][x]) continue;
 
                 bool rendered = render_pixel(x, y, P1, P2, P3, d1, d2, d3, d_min, mesh.normals[i], light, light_source, rasterizer);
                 if(!rendered && inside_found) break;
@@ -128,17 +128,17 @@ bool FrameBuffer<W, H>::render_pixel(
 
         // Visibility check
         float d = rasterizer.interp(d1, d2, d3, p);
-        if(d > depth_buffer[y][x]) return false;
-        depth_buffer[y][x] = d;
+        if(d > depth_buffer[H-y-1][x]) return false;
+        depth_buffer[H-y-1][x] = d;
 
         // Shading
         Vec3<float> light_dir;
         switch(light_source) {
             case LightSource::PUNCTUAL: {
-                Vec3<float> P = rasterizer.interp(P1, P2, P3, p);
-                Vec3<float> light_dir_long = P - light;
-                                        
-                light_dir = light_dir_long/norm(light_dir_long);
+                    Vec3<float> P = rasterizer.interp(P1, P2, P3, p);
+                    Vec3<float> light_dir_long = P - light;
+                                            
+                    light_dir = light_dir_long/norm(light_dir_long);
                 }
                 break;
             case LightSource::DIRECTIONAL:
@@ -146,7 +146,7 @@ bool FrameBuffer<W, H>::render_pixel(
                 break;
         }
         float shading = std::max(0.f, dot(face_normal, -light_dir));
-        img[y][x] = shading;
+        img[H-y-1][x] = shading;
 
         return true;
 }

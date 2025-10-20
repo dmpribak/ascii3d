@@ -20,8 +20,10 @@ target_link_libraries(ascii3d PRIVATE lib3d)
 # target_link_libraries(ascii3d PRIVATE ImageMagick::Magick++)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBSIXEL REQUIRED libsixel)
-target_include_directories(ascii3d PRIVATE ${LIBSIXEL_INCLUDE_DIRS})
-target_link_libraries(ascii3d PRIVATE ${LIBSIXEL_LIBRARIES})
+
+pkg_check_modules(NOTCURSES REQUIRED notcurses)
+target_include_directories(ascii3d PRIVATE ${NOTCURSES_INCLUDE_DIRS})
+target_link_libraries(ascii3d PRIVATE ${NOTCURSES_LIBRARIES})
 
 add_compile_options(-O3)
+set_property(TARGET ascii3d PROPERTY CXX_STANDARD 23)

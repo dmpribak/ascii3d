@@ -58,3 +58,6 @@ Mat3x3<float> rot_y(float theta) {
 
 }
 
+Mat3x3<float> euler(Vec3<float> angles) {
+    return rot_x(angles.x) * rot_y(angles.y); 
+}

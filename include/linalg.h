@@ -171,7 +171,7 @@ class SqMat {
         SqMat() {
             for(size_t i = 0; i < N; ++i) {
                 for(size_t j = 0; j < N; ++j) {
-                    m[i][j] = (i == j) ? 1 : 0;
+                    (*this)[i][j] = (i == j) ? 1 : 0;
                 }
             }
         }
@@ -180,7 +180,7 @@ class SqMat {
             SqMat M;
             for(size_t i = 0; i < N; ++i) {
                 for(size_t j = 0; j < N; ++j) {
-                    M.m[i][j] = 0;
+                    M[i][j] = 0;
                 }
             }
             
@@ -190,7 +190,7 @@ class SqMat {
         SqMat(const U mat[N][N]) {
             for(size_t i = 0; i < N; ++i) {
                 for(size_t j = 0; j < N; ++j) {
-                    m[i][j] = mat[i][j];
+                    (*this)[i][j] = mat[i][j];
                 }
             }
         }
@@ -199,18 +199,22 @@ class SqMat {
             U mat[N][N];
             for(size_t i = 0; i < N; ++i) {
                 for(size_t j = 0; j < N; ++j) {
-                    mat[i][j] = m[j][i];
+                    mat[i][j] = (*this)[j][i];
                 }
             }
             return SqMat(mat);
         }
 
+        const U* operator[](size_t idx) const {
+            return m + N*idx;
+        }
+
         U* operator[](size_t idx) {
-            return m[idx];
+            return m + N*idx;
         }
 
     private:
-        U m[N][N];
+        U m[N*N];
 };
 
 template <typename T, size_t N>
@@ -276,3 +280,4 @@ Vec2<float> dehomogenize(const Vec3<float>& v);
 
 Mat3x3<float> rot_x(float theta);
 Mat3x3<float> rot_y(float theta);
+Mat3x3<float> euler(Vec3<float> angles);

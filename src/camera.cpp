@@ -16,6 +16,7 @@ Camera::Camera(size_t H_, size_t W_, float f, const Vec3<float> C_, Mat3x3<float
     for(size_t i = 0; i < 3; ++i) {
         for(size_t j = 0; j < 3; ++j) {
             M[i][j] = R_[i][j];
+            R[i][j] = R_[i][j];
         }
     }
     Vec3<float> t = R_ * -C_;
@@ -32,4 +33,31 @@ Vec3<float> Camera::project(Vec3<float>& v) const {
     Vec3<float> v_px = Vec3<float>(v_img.x, v_img.y, v_img_hom.z); // Includes depth
     
     return v_px;
+}
+
+void Camera::translate(const Vec3<float>& v) {
+    C = C+v;
+    Vec3<float> t = R * -C;
+    M[0][3] = t.x;
+    M[1][3] = t.y;
+    M[2][3] = t.z;
+}
+
+void Camera::set_R(const Mat3x3<float>& Q) {
+    for(size_t i = 0; i < 3; ++i) {
+        for(size_t j = 0; j < 3; ++j) {
+            M[i][j] = Q[i][j];
+            R[i][j] = Q[i][j];
+        }
+    }
+    Vec3<float> t = R * -C;
+    M[0][3] = t.x;
+    M[1][3] = t.y;
+    M[2][3] = t.z;
+}
+
+Camera Camera::Euler(size_t H_, size_t W_, float f, const Vec3<float> C_, const Vec3<float> angles) {
+    Mat3x3<float> R = rot_x(angles.x) * rot_y(angles.y);
+
+    return Camera(H_, W_, f, C_, R.T());
 }

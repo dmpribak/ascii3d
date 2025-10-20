@@ -1,13 +1,7 @@
-// #include <Magick++/Color.h>
-// #include <Magick++/Geometry.h>
-// #include <Magick++/Include.h>
-// #include <MagickCore/magick-type.h>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
-#include <fstream>
-#include <iterator>
-#include <ostream>
+#include <string>
 #include <unistd.h>
 
 #include "mesh.h"
@@ -15,54 +9,133 @@
 #include "linalg.h"
 #include "render.h"
 
-// #include<Magick++.h>
-#include<sixel.h>
-
-int sixel_write(char *data, int size, void *priv) {
-    return fwrite(data, 1, size, (FILE *)priv);
-}
+#include <notcurses/notcurses.h>
 
 int main(int argc, char *argv[]) {
-    // Full rendering test
-
     std::string path = argv[1];
     Mesh mesh(path);
+
     constexpr size_t H = 512;
     constexpr size_t W = 512;
 
-    sixel_output_t *output;
-    sixel_output_new(&output, sixel_write, stdout, NULL);
-    sixel_dither_t *dither = sixel_dither_get(SIXEL_BUILTIN_G8);
-    sixel_dither_set_pixelformat(dither, SIXEL_PIXELFORMAT_G8);
-    BufMat<unsigned char, W, H> char_frame;
-    
+    notcurses_options nc_opts = {
+        NULL,
+        NCLOGLEVEL_SILENT,// NCLOGLEVEL_DEBUG,
+        0, 0, 0, 0, // Margins (top, right, bottom, left)
+        0
+    };
+
+    notcurses *nc = notcurses_init(&nc_opts, stdout);
+
     FrameBuffer<W, H> image;
 
-    for(float theta = 0; theta < 360; theta += 1) {
-        Vec3<float> C(0, 0, -10);
-        Mat3x3<float> R = rot_y(theta*0.3456) * rot_x(theta) * rot_y(30) * rot_x(70);
-        C = R.T()*C;
-        Vec3<float> light = C*1.f;
+    float theta = 0;
+    Vec3<float> C(0, 0, -10);
+    Vec3<float> light = C*1.f;
+    float f = 1000.f;
 
-        Camera cam(H, W, 1000.f, C, R);
+    Vec3<float> angles(0, 0, 0);
 
+    Camera cam = Camera::Euler(H, W, f, C, angles);
+
+    float angle_inc = 1.f;
+    float trans_inc = 0.3f;
+
+    Vec3<float> dx(trans_inc, 0.f, 0.f);
+    Vec3<float> dy(0.f, trans_inc, 0.f);
+    Vec3<float> dz(0.f, 0.f, trans_inc);
+
+    Vec3<float> da(angle_inc, 0.f, 0.f);
+    Vec3<float> db(0.f, angle_inc, 0.f);
+    Vec3<float> dg(0.f, 0.f, angle_inc);
+
+    unsigned char *char_frame = new unsigned char[W*H*4];
+
+    ncinput ni;
+
+    ncplane_options np_opts {
+        0, 0, // x, y
+        512, 512, // rows, cols
+        NULL,
+        NULL,
+        NULL,
+        0, 0, // Margins (bottom, right)
+        0
+    };
+
+    ncplane *np = notcurses_stdplane(nc);
+    ncvisual_options nv_opts {};
+    nv_opts.n = NULL;
+    // nv_opts.scaling = NCSCALE_SCALE;
+    nv_opts.blitter = NCBLIT_PIXEL;
+    nv_opts.flags = NCVISUAL_OPTION_NODEGRADE;
+    nv_opts.transcolor = 0xFFFFFFFF;
+    // notcurses_render(nc);
+    
+    uint32_t pressed = 0;
+    while(true) {
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
-        // Magick::Image my_image(W, H, "I", Magick::FloatPixel, image.img.data);
-
         for(size_t i = 0; i < W*H; ++i) {
-            char_frame.data[i] = (unsigned char)(image.img.data[i] * 256.f);
+            unsigned char gray = (image.img.data[i] * 255.f);
+
+            char_frame[4*i] = gray;
+            char_frame[4*i+1] = gray;
+            char_frame[4*i+2] = gray;
+            char_frame[4*i+3] = 0xFF;
         }
 
-        usleep(15000);
+        ncvisual *nv = ncvisual_from_rgba(char_frame, H, 4*W, W);
+        ncplane *vplane = ncvisual_blit(nc, nv, &nv_opts);
+        ncpile_render(vplane);
+        ncpile_rasterize(vplane);
 
-        // my_image.magick("png");
-        std::cout << "\033[H";
-        sixel_encode(char_frame.data, W, H, 0, dither, output);
-        // my_image.write("render.png");
-        std::cout << std::flush;
+        notcurses_get_blocking(nc, &ni);
+
+        if(ni.id == 'q') break;
+
+        switch(ni.id) {
+            case 'w':
+                cam.translate(cam.R.T()*dz);
+                break;
+            case 'a':
+                cam.translate(cam.R.T()*-dx);
+                break;
+            case 's':
+                cam.translate(cam.R.T()*-dz);
+                break;
+            case 'd':
+                cam.translate(cam.R.T()*dx);
+                break;
+            case ' ':
+                cam.translate(dy);
+                break;
+            case 'z':
+                cam.translate(-dy);
+                break;
+            case 'j':
+                angles = angles - da;
+                cam.set_R(euler(angles));
+                break;
+            case 'k':
+                angles = angles + da;
+                cam.set_R(euler(angles));
+                break;
+            case 'h':
+                angles = angles - db;
+                cam.set_R(euler(angles));
+                break;
+            case 'l':
+                angles = angles + db;
+                cam.set_R(euler(angles));
+                break;
+        }
+        light = cam.C;
 
     }
+
+    notcurses_stop(nc);
+    delete[] char_frame;
 
     return 0;
 }
