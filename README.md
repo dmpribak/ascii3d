@@ -47,6 +47,7 @@ A 3D renderer right in your terminal.
 
 ## Build Instructions
 ```bash
+apt install libnotcurses-dev # install dependencies
 mkdir build
 cd build
 cmake ..
