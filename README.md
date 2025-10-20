@@ -52,5 +52,5 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
-./ascii3d # runs the built binary
+./ascii3d your_mesh.ply # runs the built binary
 ```
