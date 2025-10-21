@@ -20,7 +20,8 @@ int main(int argc, char *argv[]) {
 
     notcurses_options nc_opts = {
         NULL,
-        NCLOGLEVEL_SILENT,// NCLOGLEVEL_DEBUG,
+        NCLOGLEVEL_SILENT,
+        // NCLOGLEVEL_DEBUG,
         0, 0, 0, 0, // Margins (top, right, bottom, left)
         0
     };
@@ -63,16 +64,19 @@ int main(int argc, char *argv[]) {
         0
     };
 
-    ncplane *np = notcurses_stdplane(nc);
+    ncplane *np_std = notcurses_stdplane(nc);
+    ncplane *np = ncplane_create(np_std, &np_opts);
     ncvisual_options nv_opts {};
     nv_opts.n = NULL;
     // nv_opts.scaling = NCSCALE_SCALE;
     nv_opts.blitter = NCBLIT_PIXEL;
-    nv_opts.flags = NCVISUAL_OPTION_NODEGRADE;
-    nv_opts.transcolor = 0xFFFFFFFF;
+    // nv_opts.flags = NCVISUAL_OPTION_NODEGRADE;
+    // nv_opts.transcolor = 0xFFFFFFFF;
     // notcurses_render(nc);
+    ncplane *vplane = nullptr;
     
     uint32_t pressed = 0;
+    bool parented = false;
     while(true) {
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
@@ -82,13 +86,22 @@ int main(int argc, char *argv[]) {
             char_frame[4*i] = gray;
             char_frame[4*i+1] = gray;
             char_frame[4*i+2] = gray;
-            char_frame[4*i+3] = 0xFF;
+            char_frame[4*i+3] = image.depth_buffer.data[i] < MAX_DEPTH ? 0xFF : 0x00;
         }
 
         ncvisual *nv = ncvisual_from_rgba(char_frame, H, 4*W, W);
-        ncplane *vplane = ncvisual_blit(nc, nv, &nv_opts);
-        ncpile_render(vplane);
-        ncpile_rasterize(vplane);
+        vplane = ncvisual_blit(nc, nv, &nv_opts);
+        // ncplane_putstr(np, "HI");
+        if(!parented) {
+            ncplane_reparent(vplane, np);
+            parented = true;
+        }
+        notcurses_render(nc);
+        nv_opts.n = vplane;
+        // ncpile_render(vplane);
+        // ncpile_rasterize(vplane);
+        // ncplane_erase(vplane);
+        // ncvisual_destroy(nv);
 
         notcurses_get_blocking(nc, &ni);
 
@@ -96,13 +109,13 @@ int main(int argc, char *argv[]) {
 
         switch(ni.id) {
             case 'w':
-                cam.translate(cam.R.T()*dz);
+                cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*dz);
                 break;
             case 'a':
                 cam.translate(cam.R.T()*-dx);
                 break;
             case 's':
-                cam.translate(cam.R.T()*-dz);
+                cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*-dz);
                 break;
             case 'd':
                 cam.translate(cam.R.T()*dx);
