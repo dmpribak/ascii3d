@@ -72,7 +72,6 @@ int main(int argc, char *argv[]) {
     nv_opts.blitter = NCBLIT_PIXEL;
     // nv_opts.flags = NCVISUAL_OPTION_NODEGRADE;
     // nv_opts.transcolor = 0xFFFFFFFF;
-    // notcurses_render(nc);
     ncplane *vplane = nullptr;
     
     uint32_t pressed = 0;
@@ -91,17 +90,12 @@ int main(int argc, char *argv[]) {
 
         ncvisual *nv = ncvisual_from_rgba(char_frame, H, 4*W, W);
         vplane = ncvisual_blit(nc, nv, &nv_opts);
-        // ncplane_putstr(np, "HI");
         if(!parented) {
             ncplane_reparent(vplane, np);
             parented = true;
         }
         notcurses_render(nc);
         nv_opts.n = vplane;
-        // ncpile_render(vplane);
-        // ncpile_rasterize(vplane);
-        // ncplane_erase(vplane);
-        // ncvisual_destroy(nv);
 
         notcurses_get_blocking(nc, &ni);
 
