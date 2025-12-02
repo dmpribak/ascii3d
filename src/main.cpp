@@ -39,8 +39,8 @@ int main(int argc, char *argv[]) {
 
     Camera cam = Camera::Euler(H, W, f, C, angles);
 
-    float angle_inc = 1.f;
-    float trans_inc = 0.3f;
+    float angle_inc = 0.65f;
+    float trans_inc = 0.1f;
 
     Vec3<float> dx(trans_inc, 0.f, 0.f);
     Vec3<float> dy(0.f, trans_inc, 0.f);
@@ -76,6 +76,18 @@ int main(int argc, char *argv[]) {
     
     uint32_t pressed = 0;
     bool parented = false;
+
+    bool wpressed = false;
+    bool apressed = false;
+    bool spressed = false;
+    bool dpressed = false;
+    bool zpressed = false;
+    bool spacepressed = false;
+    bool hpressed = false;
+    bool jpressed = false;
+    bool kpressed = false;
+    bool lpressed = false;
+
     while(true) {
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
@@ -97,46 +109,98 @@ int main(int argc, char *argv[]) {
         notcurses_render(nc);
         nv_opts.n = vplane;
 
-        notcurses_get_blocking(nc, &ni);
+        notcurses_get_nblock(nc, &ni);
 
         if(ni.id == 'q') break;
 
         switch(ni.id) {
             case 'w':
-                cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*dz);
+                if(ni.evtype == NCTYPE_PRESS) {
+                    wpressed = true;
+                } else wpressed = false;
                 break;
             case 'a':
-                cam.translate(cam.R.T()*-dx);
+                if(ni.evtype == NCTYPE_PRESS) {
+                    apressed = true;
+                } else apressed = false;
                 break;
             case 's':
-                cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*-dz);
+                if(ni.evtype == NCTYPE_PRESS) {
+                    spressed = true;
+                } else spressed = false;
                 break;
             case 'd':
-                cam.translate(cam.R.T()*dx);
+                if(ni.evtype == NCTYPE_PRESS) {
+                    dpressed = true;
+                } else dpressed = false;
                 break;
             case ' ':
-                cam.translate(dy);
+                if(ni.evtype == NCTYPE_PRESS) {
+                    spacepressed = true;
+                } else spacepressed = false;
                 break;
             case 'z':
-                cam.translate(-dy);
+                if(ni.evtype == NCTYPE_PRESS) {
+                    zpressed = true;
+                } else zpressed = false;
                 break;
             case 'j':
-                angles = angles - da;
-                cam.set_R(euler(angles));
+                if(ni.evtype == NCTYPE_PRESS) {
+                    jpressed = true;
+                } else jpressed = false;
                 break;
             case 'k':
-                angles = angles + da;
-                cam.set_R(euler(angles));
+                if(ni.evtype == NCTYPE_PRESS) {
+                    kpressed = true;
+                } else kpressed = false;
                 break;
             case 'h':
-                angles = angles - db;
-                cam.set_R(euler(angles));
+                if(ni.evtype == NCTYPE_PRESS) {
+                    hpressed = true;
+                } else hpressed = false;
                 break;
             case 'l':
-                angles = angles + db;
-                cam.set_R(euler(angles));
+                if(ni.evtype == NCTYPE_PRESS) {
+                    lpressed = true;
+                } else lpressed = false;
                 break;
         }
+
+        if(wpressed) {
+            cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*dz);
+        }
+        if(apressed) {
+            cam.translate(cam.R.T()*-dx);
+        }
+        if(spressed) {
+            cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*-dz);
+        }
+        if(dpressed) {
+            cam.translate(cam.R.T()*dx);
+        }
+        if(spacepressed) {
+            cam.translate(dy);
+        }
+        if(zpressed) {
+            cam.translate(-dy);
+        }
+        if(jpressed) {
+            angles = angles - da;
+            cam.set_R(euler(angles));
+        }
+        if(kpressed) {
+            angles = angles + da;
+            cam.set_R(euler(angles));
+        }
+        if(hpressed) {
+            angles = angles - db;
+            cam.set_R(euler(angles));
+        }
+        if(lpressed) {
+            angles = angles + db;
+            cam.set_R(euler(angles));
+        }
+
         light = cam.C;
 
     }

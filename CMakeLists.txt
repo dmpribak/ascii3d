@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+# set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(ascii3d)
 
@@ -26,4 +27,5 @@ target_include_directories(ascii3d PRIVATE ${NOTCURSES_INCLUDE_DIRS})
 target_link_libraries(ascii3d PRIVATE ${NOTCURSES_LIBRARIES})
 
 add_compile_options(-O3)
+# add_compile_options(-fno-omit-frame-pointer)
 set_property(TARGET ascii3d PROPERTY CXX_STANDARD 23)
