@@ -1,4 +1,4 @@
-# Ascii3D
+# Termesh
 A 3D renderer right in your terminal.
 ```
                            **********                                                          
