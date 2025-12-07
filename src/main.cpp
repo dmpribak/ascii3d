@@ -1,15 +1,22 @@
+#define EIGEN_USE_BLAS
+
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <string>
 #include <unistd.h>
 
+#include "Eigen/Core"
 #include "mesh.h"
 #include "camera.h"
-#include "linalg.h"
 #include "render.h"
 
 #include <notcurses/notcurses.h>
+#include <notcurses/direct.h>
+#include <Eigen/Dense>
+
+using Eigen::Matrix3f;
+using Eigen::Vector3f;
 
 int main(int argc, char *argv[]) {
     std::string path = argv[1];
@@ -31,24 +38,24 @@ int main(int argc, char *argv[]) {
     FrameBuffer<W, H> image;
 
     float theta = 0;
-    Vec3<float> C(0, 0, -10);
-    Vec3<float> light = C*1.f;
+    Vector3f C(0, 0, -10);
+    Vector3f light = C*1.f;
     float f = 1000.f;
 
-    Vec3<float> angles(0, 0, 0);
+    Vector3f angles(0, 0, 0);
 
     Camera cam = Camera::Euler(H, W, f, C, angles);
 
     float angle_inc = 0.65f;
     float trans_inc = 0.1f;
 
-    Vec3<float> dx(trans_inc, 0.f, 0.f);
-    Vec3<float> dy(0.f, trans_inc, 0.f);
-    Vec3<float> dz(0.f, 0.f, trans_inc);
+    Vector3f dx(trans_inc, 0.f, 0.f);
+    Vector3f dy(0.f, trans_inc, 0.f);
+    Vector3f dz(0.f, 0.f, trans_inc);
 
-    Vec3<float> da(angle_inc, 0.f, 0.f);
-    Vec3<float> db(0.f, angle_inc, 0.f);
-    Vec3<float> dg(0.f, 0.f, angle_inc);
+    Vector3f da(angle_inc, 0.f, 0.f);
+    Vector3f db(0.f, angle_inc, 0.f);
+    Vector3f dg(0.f, 0.f, angle_inc);
 
     unsigned char *char_frame = new unsigned char[W*H*4];
 
@@ -56,7 +63,7 @@ int main(int argc, char *argv[]) {
 
     ncplane_options np_opts {
         0, 0, // x, y
-        512, 512, // rows, cols
+        1, 1, // rows, cols
         NULL,
         NULL,
         NULL,
@@ -89,6 +96,7 @@ int main(int argc, char *argv[]) {
     bool lpressed = false;
 
     while(true) {
+        // usleep(3200);
         image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
         for(size_t i = 0; i < W*H; ++i) {
@@ -167,16 +175,16 @@ int main(int argc, char *argv[]) {
         }
 
         if(wpressed) {
-            cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*dz);
+            cam.translate(euler(Vector3f(0.f, angles.y(), 0.f)).transpose()*dz);
         }
         if(apressed) {
-            cam.translate(cam.R.T()*-dx);
+            cam.translate(cam.R.transpose()*-dx);
         }
         if(spressed) {
-            cam.translate(euler(Vec3<float>(0.f, angles.y, 0.f)).T()*-dz);
+            cam.translate(euler(Vector3f(0.f, angles.y(), 0.f)).transpose()*-dz);
         }
         if(dpressed) {
-            cam.translate(cam.R.T()*dx);
+            cam.translate(cam.R.transpose()*dx);
         }
         if(spacepressed) {
             cam.translate(dy);
@@ -207,6 +215,6 @@ int main(int argc, char *argv[]) {
 
     notcurses_stop(nc);
     delete[] char_frame;
-
+    
     return 0;
 }

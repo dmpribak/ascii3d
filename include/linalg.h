@@ -3,6 +3,12 @@
 #include <cmath>
 #include <iostream>
 #include <math.h>
+#include <Eigen/Dense>
+
+using Eigen::Vector2f;
+using Eigen::Vector3f;
+using Eigen::Vector4f;
+using Eigen::Matrix3f;
 
 template <typename T>
 class Vec2 {
@@ -270,14 +276,11 @@ Vec4<T> operator*(Mat4x4<T> M, Vec4<T> v) {
             );
 }
 
-template <typename T>
-Vec4<T> homogenize(const Vec3<T> &v) {
-    return Vec4<T>(v.x, v.y, v.z, 1.);
-}
+Vector4f homogenize3f(const Vector3f &v);
 
-Vec3<float> dehomogenize(const Vec4<float>& v);
-Vec2<float> dehomogenize(const Vec3<float>& v);
+Vector3f dehomogenize4f(const Vector4f& v);
+Vector2f dehomogenize3f(const Vector3f& v);
 
-Mat3x3<float> rot_x(float theta);
-Mat3x3<float> rot_y(float theta);
-Mat3x3<float> euler(Vec3<float> angles);
+Matrix3f rot_x(float theta);
+Matrix3f rot_y(float theta);
+Matrix3f euler(Vector3f angles);

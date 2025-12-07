@@ -32,9 +32,9 @@ Mesh::Mesh(std::string filename) {
     }
 
     // Reserve memory for data
-    vertices = new Vec3<float>[n_vertices];
+    vertices = new Vector3f[n_vertices];
     triangles = new Vec3<size_t>[n_triangles];
-    normals = new Vec3<float>[n_triangles];
+    normals = new Vector3f[n_triangles];
 
     // Read vertex coordinates
     for(size_t i = 0; i < n_vertices; ++i) {
@@ -46,7 +46,7 @@ Mesh::Mesh(std::string filename) {
             line_stream >> word;
             coords[j] = std::stof(word);
         }
-        vertices[i] = Vec3<float>(coords[0], coords[1], coords[2]);
+        vertices[i] = Vector3f(coords[0], coords[1], coords[2]);
     }
 
     // Read triangle indices
@@ -75,14 +75,14 @@ Mesh::~Mesh() {
 
 void Mesh::compute_normals() {
     for(size_t i = 0; i < n_triangles; ++i) {
-        Vec3<float> v1 = vertices[triangles[i].x];
-        Vec3<float> v2 = vertices[triangles[i].y];
-        Vec3<float> v3 = vertices[triangles[i].z];
+        Vector3f v1 = vertices[triangles[i].x];
+        Vector3f v2 = vertices[triangles[i].y];
+        Vector3f v3 = vertices[triangles[i].z];
 
-        Vec3<float> e1 = v2 - v1;
-        Vec3<float> e2 = v3 - v1;
-        Vec3<float> e3 = cross(e1, e2);
-        Vec3<float> normal = e3 / norm(e3);
+        Vector3f e1 = v2 - v1;
+        Vector3f e2 = v3 - v1;
+        Vector3f e3 = e1.cross(e2);
+        Vector3f normal = e3 / e3.norm();
         normals[i] = normal;
     }
 }

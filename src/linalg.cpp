@@ -1,63 +1,49 @@
 #include "linalg.h"
 
 #include <math.h>
+#include <Eigen/Dense>
 
-float norm(const Vec2<float>& v) {
-    return std::sqrt(v.x*v.x + v.y*v.y);
+using Eigen::Vector2f;
+using Eigen::Vector3f;
+using Eigen::Vector4f;
+using Eigen::Matrix3f;
+
+Vector4f homogenize3f(const Vector3f &v) {
+    return Vector4f(v.x(), v.y(), v.z(), 1.);
 }
 
-Vec2<float> operator/(const Vec2<float>& v, const float a) {
-    return Vec2<float>(v.x/a, v.y/a);
+Vector3f dehomogenize4f(const Vector4f& v) {
+    return Vector3f(v.x(), v.y(), v.z()) / v.w();
 }
 
-float norm(const Vec3<float>& v) {
-    return std::sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+Vector2f dehomogenize3f(const Vector3f& v) {
+    return Vector2f(v.x(), v.y()) / v.z();
 }
 
-Vec3<float> operator/(const Vec3<float>& v, const float a) {
-    return Vec3<float>(v.x/a, v.y/a, v.z/a);
-}
-
-float norm(const Vec4<float>& v) {
-    return std::sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-}
-
-Vec4<float> operator/(const Vec4<float>& v, const float a) {
-    return Vec4<float>(v.x/a, v.y/a, v.z/a, v.w/a);
-}
-
-Vec3<float> dehomogenize(const Vec4<float>& v) {
-    return Vec3<float>(v.x, v.y, v.z) / v.w;
-}
-
-Vec2<float> dehomogenize(const Vec3<float>& v) {
-    return Vec2<float>(v.x, v.y) / v.z;
-}
-
-Mat3x3<float> rot_x(float theta) {
+Matrix3f rot_x(float theta) {
     theta *= 3.14159265/180.;
-    float m[3][3] = {
-        {1.,    0.,             0.         },
-        {0.,    cos(theta),     -sin(theta)},
-        {0.,    sin(theta),     cos(theta) }
+    float m[3*3] = {
+        1.,    0.,             0.,
+        0.,    cos(theta),     -sin(theta),
+        0.,    sin(theta),     cos(theta) 
     };
 
-    return Mat3x3<float>(m);
+    return Matrix3f(m).transpose();
 
 }
 
-Mat3x3<float> rot_y(float theta) {
+Matrix3f rot_y(float theta) {
     theta *= 3.14159265/180.;
-    float m[3][3] = {
-        {cos(theta),    0.,     sin(theta)},
-        {0.,            1.,     0         },
-        {-sin(theta),   0.,     cos(theta)}
+    float m[3*3] = {
+        cos(theta),    0.,     sin(theta),
+        0.,            1.,     0         ,
+        -sin(theta),   0.,     cos(theta)
     };
 
-    return Mat3x3<float>(m);
+    return Matrix3f(m).transpose();
 
 }
 
-Mat3x3<float> euler(Vec3<float> angles) {
-    return rot_x(angles.x) * rot_y(angles.y); 
+Matrix3f euler(Vector3f angles) {
+    return rot_x(angles(0)) * rot_y(angles(1)); 
 }

@@ -2,62 +2,69 @@
 #include "linalg.h"
 #include <cstddef>
 
-Camera::Camera(size_t H_, size_t W_, float f, const Vec3<float> C_, Mat3x3<float> R_): H(H_), W(W_) {
-    float s = (float)H_/(float)W_;
-    float mK[3][3] = {
-            {f,     0.,     (float)W_/2},
-            {0.,    f*s,      (float)H_/2},
-            {0.,    0.,     1.        }
-            };
-    K = Mat3x3<float>(mK);
-    C = Vec3<float>(C_.x, C_.y, C_.z);
+#include <Eigen/Dense>
 
-    M = Mat4x4<float>();
+using Eigen::Vector3f;
+using Eigen::Matrix3f;
+using Eigen::Matrix4f;
+
+Camera::Camera(size_t H_, size_t W_, float f, const Vector3f C_, Matrix3f R_): H(H_), W(W_) {
+    float s = (float)H_/(float)W_;
+    float mK[3*3] = {
+            f,     0.,     (float)W_/2,
+            0.,    f*s,      (float)H_/2,
+            0.,    0.,     1.        
+            };
+    K = Matrix3f(mK).transpose();
+    C = Vector3f(C_.x(), C_.y(), C_.z());
+
+    M = Matrix4f::Identity();
     for(size_t i = 0; i < 3; ++i) {
         for(size_t j = 0; j < 3; ++j) {
-            M[i][j] = R_[i][j];
-            R[i][j] = R_[i][j];
+            M(i,j) = R_(i,j);
+            R(i,j) = R_(i,j);
         }
     }
-    Vec3<float> t = R_ * -C_;
-    M[0][3] = t.x;
-    M[1][3] = t.y;
-    M[2][3] = t.z;
+    Vector3f t = R_ * -C_;
+    M(0,3) = t.x();
+    M(1,3) = t.y();
+    M(2,3) = t.z();
 }
 
-Vec3<float> Camera::project(Vec3<float>& v) const {
-    Vec4<float> v_hom = homogenize(v);
-    Vec3<float> v_cam = dehomogenize(M*v_hom);
-    Vec3<float> v_img_hom = K*v_cam;
-    Vec2<float> v_img = dehomogenize(v_img_hom);
-    Vec3<float> v_px = Vec3<float>(v_img.x, v_img.y, v_img_hom.z); // Includes depth
+Vector3f Camera::project(Vector3f& v) const {
+    Vector4f v_hom = homogenize3f(v);
+    Vector4f v_cam_hom = M*v_hom;
+    Vector3f v_cam = dehomogenize4f(v_cam_hom);
+    Vector3f v_img_hom = K*v_cam;
+    Vector2f v_img = dehomogenize3f(v_img_hom);
+    Vector3f v_px = Vector3f(v_img.x(), v_img.y(), v_img_hom.z()); // Includes depth
     
     return v_px;
 }
 
-void Camera::translate(const Vec3<float>& v) {
+void Camera::translate(const Vector3f& v) {
     C = C+v;
-    Vec3<float> t = R * -C;
-    M[0][3] = t.x;
-    M[1][3] = t.y;
-    M[2][3] = t.z;
+    Vector3f t = R * -C;
+    M(0,3) = t.x();
+    M(1,3) = t.y();
+    M(2,3) = t.z();
 }
 
-void Camera::set_R(const Mat3x3<float>& Q) {
+void Camera::set_R(const Matrix3f& Q) {
     for(size_t i = 0; i < 3; ++i) {
         for(size_t j = 0; j < 3; ++j) {
-            M[i][j] = Q[i][j];
-            R[i][j] = Q[i][j];
+            M(i,j) = Q(i,j);
+            R(i,j) = Q(i,j);
         }
     }
-    Vec3<float> t = R * -C;
-    M[0][3] = t.x;
-    M[1][3] = t.y;
-    M[2][3] = t.z;
+    Vector3f t = R * -C;
+    M(0,3) = t.x();
+    M(1,3) = t.y();
+    M(2,3) = t.z();
 }
 
-Camera Camera::Euler(size_t H_, size_t W_, float f, const Vec3<float> C_, const Vec3<float> angles) {
-    Mat3x3<float> R = rot_x(angles.x) * rot_y(angles.y);
+Camera Camera::Euler(size_t H_, size_t W_, float f, const Vector3f C_, const Vector3f angles) {
+    Matrix3f R = rot_x(angles.x()) * rot_y(angles.y());
 
-    return Camera(H_, W_, f, C_, R.T());
+    return Camera(H_, W_, f, C_, R.transpose());
 }

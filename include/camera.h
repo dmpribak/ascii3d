@@ -1,23 +1,27 @@
 #pragma once
 
-#include "linalg.h"
 #include <cstddef>
+#include <Eigen/Dense>
+
+using Eigen::Vector3f;
+using Eigen::Matrix3f;
+using Eigen::Matrix4f;
 
 class Camera {
     public:
         size_t H, W;
-        Mat3x3<float> K;
-        Mat4x4<float> M;
-        Vec3<float> C;
-        Mat3x3<float> R;
+        Matrix3f K;
+        Matrix4f M;
+        Vector3f C;
+        Matrix3f R;
         
-        Camera(size_t H_, size_t W_, float f, const Vec3<float> C_, const Mat3x3<float> R_);
+        Camera(size_t H_, size_t W_, float f, const Vector3f C_, const Matrix3f R_);
 
-        static Camera Euler(size_t H_, size_t W_, float f, const Vec3<float> C_, const Vec3<float> angles);
+        static Camera Euler(size_t H_, size_t W_, float f, const Vector3f C_, const Vector3f angles);
 
-        Vec3<float> project(Vec3<float>& v) const;
+        Vector3f project(Vector3f& v) const;
 
-        void translate(const Vec3<float>& v);
+        void translate(const Vector3f& v);
 
-        void set_R(const Mat3x3<float>& Q);
+        void set_R(const Matrix3f& Q);
 };
