@@ -16,10 +16,6 @@ An interactive 3D renderer right in your terminal.
 | `Z` | move down |
 | `H` | turn left |
 | `J` | turn down |
-
-
-
-
 | `K` | turn up |
 | `L` | turn left |
 
