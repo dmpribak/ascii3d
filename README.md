@@ -1,21 +1,23 @@
 # Termesh
 An interactive 3D renderer right in your terminal.
-![interactive demo](assets/termesh_demo.mp4)
+
+[demo](assets/termesh_demo.mp4)
+
 ![cube render](assets/render.png)
 
 ## Controls
 | Key | Effect |
 | --- | ------ |
-| W | move forwards |
-| A | move left |
-| S | move backwards |
-| D | move right |
-| <space> | move up |
-| Z | move down |
-| H | turn left |
-| J | turn down |
-| K | turn up |
-| L | turn left |
+| `W` | move forwards |
+| `A` | move left |
+| `S` | move backwards |
+| `D` | move right |
+| `<space>` | move up |
+| `Z` | move down |
+| `H` | turn left |
+| `J` | turn down |
+| `K` | turn up |
+| `L` | turn left |
 
 ## Build Instructions
 ```bash
