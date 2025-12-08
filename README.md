@@ -3,7 +3,7 @@ An interactive 3D renderer right in your terminal.
 
 [demo](https://github.com/user-attachments/assets/abc066dc-a92e-4925-a706-75ba97cd51ec)
 
-[demo2](https://github.com/user-attachments/assets/60c21a90-e111-44a1-aaa9-daea903abc52)
+[demo2](https://github.com/user-attachments/assets/8704274a-7f4b-43cc-9073-99cebe2e0f83)
 
 <img src="assets/render.png" width=50%>
 
