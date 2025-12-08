@@ -1,9 +1,9 @@
 # Termesh
 An interactive 3D renderer right in your terminal.
 
-[demo](assets/termesh_demo.mp4)
+[demo](https://github.com/user-attachments/assets/abc066dc-a92e-4925-a706-75ba97cd51ec)
 
-![cube render](assets/render.png)
+<img src="assets/render.png" width=50%>
 
 ## Controls
 | Key | Effect |
@@ -16,6 +16,10 @@ An interactive 3D renderer right in your terminal.
 | `Z` | move down |
 | `H` | turn left |
 | `J` | turn down |
+
+
+
+
 | `K` | turn up |
 | `L` | turn left |
 
