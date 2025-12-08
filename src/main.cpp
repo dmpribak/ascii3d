@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <cstring>
 #define EIGEN_USE_BLAS
 
 #include <cmath>
@@ -5,6 +7,8 @@
 #include <cstdio>
 #include <string>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #include "Eigen/Core"
 #include "mesh.h"
@@ -12,7 +16,6 @@
 #include "render.h"
 
 #include <notcurses/notcurses.h>
-#include <notcurses/direct.h>
 #include <Eigen/Dense>
 
 using Eigen::Matrix3f;
@@ -24,6 +27,9 @@ int main(int argc, char *argv[]) {
 
     constexpr size_t H = 512;
     constexpr size_t W = 512;
+
+    constexpr float fps = 60.;
+    constexpr std::chrono::duration frame_duration = std::chrono::duration<float>(1./fps);
 
     notcurses_options nc_opts = {
         NULL,
@@ -77,9 +83,8 @@ int main(int argc, char *argv[]) {
     nv_opts.n = NULL;
     // nv_opts.scaling = NCSCALE_SCALE;
     nv_opts.blitter = NCBLIT_PIXEL;
-    // nv_opts.flags = NCVISUAL_OPTION_NODEGRADE;
     // nv_opts.transcolor = 0xFFFFFFFF;
-    ncplane *vplane = nullptr;
+    // ncplane *vplane = nullptr;
     
     uint32_t pressed = 0;
     bool parented = false;
@@ -94,32 +99,54 @@ int main(int argc, char *argv[]) {
     bool jpressed = false;
     bool kpressed = false;
     bool lpressed = false;
+    bool force_render = true;
+
+    ncvisual *nv = ncvisual_from_rgba(char_frame, H, 4*W, W);
+    ncplane *vplane = ncvisual_blit(nc, nv, &nv_opts);
+    ncplane_reparent(vplane, np);
+    parented = true;
+    nv_opts.n = vplane;
+
+
 
     while(true) {
-        // usleep(3200);
-        image.render(mesh, cam, light, LightSource::PUNCTUAL);
+        std::chrono::time_point frame_start = std::chrono::steady_clock::now();
 
-        for(size_t i = 0; i < W*H; ++i) {
-            unsigned char gray = (image.img.data[i] * 255.f);
+        bool scene_changed = wpressed || apressed || spressed || dpressed || spacepressed || zpressed
+                           || jpressed || kpressed || hpressed || lpressed || force_render;
+        if(scene_changed) {
+            image.render(mesh, cam, light, LightSource::PUNCTUAL);
 
-            char_frame[4*i] = gray;
-            char_frame[4*i+1] = gray;
-            char_frame[4*i+2] = gray;
-            char_frame[4*i+3] = image.depth_buffer.data[i] < MAX_DEPTH ? 0xFF : 0x00;
+            for(size_t i = 0; i < W*H; ++i) {
+                unsigned char gray = (image.img.data[i] * 255.f);
+                unsigned char alpha = image.depth_buffer.data[i] < MAX_DEPTH ? 0xFF : 0x00; 
+
+                char_frame[4*i] = gray;
+                char_frame[4*i+1] = gray;
+                char_frame[4*i+2] = gray;
+                char_frame[4*i+3] = alpha;
+
+                // uint32_t pixel = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+                // ncvisual_set_yx(nv, i/W, i%H, pixel);
+
+            }
+
+            nv = ncvisual_from_rgba(char_frame, H, 4*W, W);
+            ncvisual_blit(nc, nv, &nv_opts);
+            ncpile_render(vplane);
+            ncpile_rasterize(vplane);
+            // notcurses_render(nc);
+            // ncvisual_destroy(nv);
+            force_render = false;
         }
 
-        ncvisual *nv = ncvisual_from_rgba(char_frame, H, 4*W, W);
-        vplane = ncvisual_blit(nc, nv, &nv_opts);
-        if(!parented) {
-            ncplane_reparent(vplane, np);
-            parented = true;
+        bool quitted = false;
+        if(notcurses_get_nblock(nc, &ni) > 0) {
+
+        if(ni.id == 'q') {
+            quitted = true;
+            break;
         }
-        notcurses_render(nc);
-        nv_opts.n = vplane;
-
-        notcurses_get_nblock(nc, &ni);
-
-        if(ni.id == 'q') break;
 
         switch(ni.id) {
             case 'w':
@@ -173,6 +200,7 @@ int main(int argc, char *argv[]) {
                 } else lpressed = false;
                 break;
         }
+        }
 
         if(wpressed) {
             cam.translate(euler(Vector3f(0.f, angles.y(), 0.f)).transpose()*dz);
@@ -201,15 +229,21 @@ int main(int argc, char *argv[]) {
             cam.set_R(euler(angles));
         }
         if(hpressed) {
-            angles = angles - db;
+            angles = angles + db;
             cam.set_R(euler(angles));
         }
         if(lpressed) {
-            angles = angles + db;
+            angles = angles - db;
             cam.set_R(euler(angles));
         }
 
         light = cam.C;
+
+        std::chrono::time_point frame_end = std::chrono::steady_clock::now();
+        std::chrono::duration elapsed = frame_end - frame_start;
+        if(elapsed < frame_duration) {
+            std::this_thread::sleep_for(frame_duration - elapsed);
+        }
 
     }
 

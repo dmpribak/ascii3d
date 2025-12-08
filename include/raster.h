@@ -14,6 +14,9 @@ class RasterIterator {
         RasterIterator& operator--();
         RasterIterator operator--(int);
 
+        template <typename T>
+        T interp(T a1, T a2, T a3);
+
         friend class TriangleRasterizer;
 
     private:
@@ -30,7 +33,7 @@ class RasterIterator {
 class TriangleRasterizer {
     public:
         TriangleRasterizer(Vector3f p1, Vector3f p2, Vector3f p3);
-        bool inside(Vector2f &p);
+        bool inside(Vector2f p);
 
         template <typename T>
         T interp(T a1, T a2, T a3, Vector2f p);
@@ -38,11 +41,11 @@ class TriangleRasterizer {
         template <typename T>
         T interp_pc(T a1, T a2, T a3, Vector2f p);
 
-        float e1(const Vector2f &p);
-        float e2(const Vector2f &p);
-        float e3(const Vector2f &p);
+        float e1(const Vector2f p);
+        float e2(const Vector2f p);
+        float e3(const Vector2f p);
 
-        RasterIterator xiter(const Vector2f &p);
+        RasterIterator xiter(const Vector2f p);
 
     private:
         Vector2f n1, n2, n3;
@@ -52,11 +55,25 @@ class TriangleRasterizer {
 };
 
 template <typename T>
-T TriangleRasterizer::interp(T a1, T a2, T a3, Vector2f p) {
-    Vector2f uv = Vector2f(e2(p), e3(p)) / 
-                     (e1(p) + e2(p) + e3(p));
+T RasterIterator::interp(T a1, T a2, T a3) {
+    Vector2f uv = Vector2f(e2, e3) / 
+                     (e1 + e2 + e3);
     float u = uv.x();
     float v = uv.y();
+
+    return (1-u-v)*a3 + u*a1 + v*a2;
+}
+
+template <typename T>
+T TriangleRasterizer::interp(T a1, T a2, T a3, Vector2f p) {
+    // Vector2f uv = Vector2f(e2(p), e3(p)) / 
+    //                  (e1(p) + e2(p) + e3(p));
+    // float u = uv.x();
+    // float v = uv.y();
+    //
+    float denom = 1./(e1(p) + e2(p) + e3(p));
+    float u = e2(p) * denom;
+    float v = e3(p) * denom;
 
     return (1-u-v)*a3 + u*a1 + v*a2;
 }

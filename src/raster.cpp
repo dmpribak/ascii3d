@@ -20,25 +20,25 @@ TriangleRasterizer::TriangleRasterizer(Vector3f p1, Vector3f p2, Vector3f p3) {
     delta3 = p1-p3;
 }
 
-bool TriangleRasterizer::inside(Vector2f &p) {
+bool TriangleRasterizer::inside(Vector2f p) {
     return e1(p) >= 0 &&
            e2(p) >= 0 &&
            e3(p) >= 0;
 }
 
-float TriangleRasterizer::e1(const Vector2f &p) {
+float TriangleRasterizer::e1(const Vector2f p) {
     return n1.dot(p) + c1;
 }
 
-float TriangleRasterizer::e2(const Vector2f &p) {
+float TriangleRasterizer::e2(const Vector2f p) {
     return n2.dot(p) + c2;
 }
 
-float TriangleRasterizer::e3(const Vector2f &p) {
+float TriangleRasterizer::e3(const Vector2f p) {
     return n3.dot(p) + c3;
 }
 
-RasterIterator TriangleRasterizer::xiter(const Vector2f &p) {
+RasterIterator TriangleRasterizer::xiter(const Vector2f p) {
     return RasterIterator(
             e1(p), e2(p), e3(p),
             delta1.y(), delta2.y(), delta3.y()
@@ -53,7 +53,6 @@ RasterIterator& RasterIterator::operator++() {
     e1 += d1;
     e2 += d2;
     e3 += d3;
-    // std::cout << e1 << " " << e2 << " " << " " << e3 << std::endl;
     inside = eval();
 
     return *this;

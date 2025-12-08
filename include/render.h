@@ -34,16 +34,17 @@ class FrameBuffer {
 
         void clear();
 
-        void render(Mesh& mesh, Camera& camera, Vector3f& light, LightSource light_source);
+        void render(Mesh& mesh, Camera& camera, Vector3f light, LightSource light_source);
 
         bool render_pixel(
                 size_t x, size_t y, 
-                Vector3f& P1, Vector3f& P2, Vector3f& P3, 
+                Vector3f P1, Vector3f P2, Vector3f P3, 
                 float d1, float d2, float d3, float d_min,
-                Vector3f& face_normal, 
-                Vector3f& light, 
+                Vector3f face_normal, 
+                Vector3f light, 
                 LightSource light_source,
-                TriangleRasterizer& rasterizer);
+                TriangleRasterizer &rasterizer,
+                RasterIterator &ri);
 };
 
 template <size_t W, size_t H>
@@ -58,7 +59,7 @@ void FrameBuffer<W, H>::clear() {
 }
 
 template <size_t W, size_t H>
-void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vector3f& light, LightSource light_source) {
+void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vector3f light, LightSource light_source) {
     clear();
 
     for(size_t i = 0; i < mesh.n_triangles; ++i) {
@@ -95,11 +96,12 @@ void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vector3f& light, Ligh
             RasterIterator ri = rasterizer.xiter(iter_start1);
             for(size_t x = x_mid; x <= x_max && x >= x_min; ++x) {
                 Vector2f curr(x, y);
-                // if (rasterizer.inside(curr)) continue;
                 // Depth culling and inside check
-                if(!*ri++ || d_min > depth_buffer[H-y-1][x]) continue;
+                bool inside = *ri++;
+                if(!inside && inside_found) break;
+                if(!inside || d_min > depth_buffer[H-y-1][x]) continue;
 
-                bool rendered = render_pixel(x, y, P1, P2, P3, d1, d2, d3, d_min, mesh.normals[i], light, light_source, rasterizer);
+                bool rendered = render_pixel(x, y, P1, P2, P3, d1, d2, d3, d_min, mesh.normals[i], light, light_source, rasterizer, ri);
                 if(!rendered && inside_found) break;
                 else if(rendered) inside_found = true;
             }
@@ -107,10 +109,13 @@ void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vector3f& light, Ligh
             Vector2f iter_start2(x_mid, y);
             ri = rasterizer.xiter(iter_start2);
             for(size_t x = x_mid; x >= x_min && x <= x_max; --x) {
+                Vector2f curr(x, y);
                 // Depth culling and inside check
-                if(!*ri-- || d_min > depth_buffer[H-y-1][x]) continue;
+                bool inside = *ri--;
+                if(!inside && inside_found) break;
+                if(!inside || d_min > depth_buffer[H-y-1][x]) continue;
 
-                bool rendered = render_pixel(x, y, P1, P2, P3, d1, d2, d3, d_min, mesh.normals[i], light, light_source, rasterizer);
+                bool rendered = render_pixel(x, y, P1, P2, P3, d1, d2, d3, d_min, mesh.normals[i], light, light_source, rasterizer, ri);
                 if(!rendered && inside_found) break;
                 else if(rendered) inside_found = true;
             }
@@ -121,12 +126,13 @@ void FrameBuffer<W, H>::render(Mesh& mesh, Camera& camera, Vector3f& light, Ligh
 template <size_t W, size_t H>
 bool FrameBuffer<W, H>::render_pixel(
         size_t x, size_t y, 
-        Vector3f& P1, Vector3f& P2, Vector3f& P3, 
+        Vector3f P1, Vector3f P2, Vector3f P3, 
         float d1, float d2, float d3, float d_min,
-        Vector3f& face_normal, 
-        Vector3f& light, 
+        Vector3f face_normal, 
+        Vector3f light, 
         LightSource light_source,
-        TriangleRasterizer& rasterizer) {
+        TriangleRasterizer &rasterizer,
+        RasterIterator &ri) {
 
         Vector2f p(x, y);
 
