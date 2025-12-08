@@ -23,6 +23,9 @@ An interactive 3D renderer right in your terminal.
 
 ## Build Instructions
 ```bash
+git clone https://github.com/dmpribak/termesh.git
+cd termesh
+git submodule update --init --recursive
 apt install libnotcurses-dev # install dependencies
 mkdir build
 cd build
