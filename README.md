@@ -26,7 +26,7 @@ An interactive 3D renderer right in your terminal.
 apt install libnotcurses-dev # install dependencies
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ./termesh your_mesh.ply # runs the built binary
 ```
