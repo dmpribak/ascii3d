@@ -1,6 +1,8 @@
 # Termesh
 An interactive 3D renderer right in your terminal.
 
+Requires a terminal emulator that supports the kitty [graphics](https://sw.kovidgoyal.net/kitty/graphics-protocol/) and [keyboard](https://sw.kovidgoyal.net/kitty/keyboard-protocol/) protocols.
+
 [demo](https://github.com/user-attachments/assets/abc066dc-a92e-4925-a706-75ba97cd51ec)
 
 [demo2](https://github.com/user-attachments/assets/8704274a-7f4b-43cc-9073-99cebe2e0f83)
