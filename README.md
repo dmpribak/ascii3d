@@ -21,7 +21,7 @@ Requires a terminal emulator that supports the kitty [graphics](https://sw.kovid
 | `H` | turn left |
 | `J` | turn down |
 | `K` | turn up |
-| `L` | turn left |
+| `L` | turn right |
 
 ## Build Instructions
 ```bash
